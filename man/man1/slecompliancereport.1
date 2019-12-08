@@ -52,3 +52,12 @@ The secret AWS API key
 .IP "--verbose"
 Write progress information to
 .I stdout
+.SH CAVEAT
+The implementation uses the
+.I get_available_regions
+API from the
+.I boto3
+implementation. This API produces the result of a hard coded list from the
+.I boto3
+implementation. Therefore, depending on the version of the installed boto3
+package not all available regions may be processed.
