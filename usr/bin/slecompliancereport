@@ -53,6 +53,12 @@ argparse.add_argument(
     help='Automatically update the registration client when needed'
 )
 argparse.add_argument(
+    '--instance-ids',
+    dest='instance_ids',
+    help='Comma separated list of instance-ids to check (Optional)',
+    metavar='INSTANCE_IDS'
+)
+argparse.add_argument(
     '--instance-user',
     dest='instace_user',
     help='The user name for the user that can login with the given ssh key',
@@ -103,7 +109,7 @@ else:
         aws_secret_access_key=args.secret_key
     ).get_available_regions('ec2')
     # Special region may not be avialble to everyone but we'll test it
-    region.append('ap-northeast-3')
+    regions.append('ap-northeast-3')
 
 compliance_state = {}
 warning_sle11 = {}
@@ -125,14 +131,17 @@ for region in regions:
             'Unable to access region "%s" with provided access keys' % region
         )
         sys.exit(1)
-    instance_info = ec2.describe_instances(
-        Filters=[
+    describe_kwargs = {
+        'Filters': [
             {
                 'Name':'instance-state-name',
                 'Values': ['running']
             }
         ]
-    )
+    }
+    if args.instance_ids:
+        describe_kwargs['InstanceIds'] = args.instance_ids.split(',')
+    instance_info = ec2.describe_instances(**describe_kwargs)
     instances = []
     for reservation in instance_info['Reservations']:
         instances += reservation['Instances']
@@ -323,7 +332,7 @@ for region in regions:
                 stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
             else:
                 compliance_state[region][instance_id].append('warn')            
-client.close()
+        client.close()
 
 for region, instance_data in compliance_state.items():
     print('Compliance data for region: "%s"' % region)

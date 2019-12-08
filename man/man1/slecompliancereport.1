@@ -1,0 +1,54 @@
+.\" Process this file with
+.\" groff -man -Tascii slecompliancereport.1
+.\"
+.TH slecompliancereport
+.SH NAME
+slecompliancereport \- Check running instances in EC2 and report compliance to terms of use
+.SH SYNOPSIS
+.B slecompliancereport [options]
+.SH DESCRIPTION
+.B slecompliancereport
+Generate a compliance report for all running SUSE instance in a region.
+Prior to the middle of 2019 it was possible to accidentally lose the
+billing construct for on-demand instances in EC2 when creating images
+from running instances. This condition supports access to the SUSE operated
+update infrastructure without instances from the custom image being recognized
+as SUSE on-demand instances. Instances in this state are considered to be out
+of compliance. This script will report on all such instances to allow the
+user to take appropriate action. Either by bringing the instance back into
+compliance via a root volume swap procedure or registering the instance with
+the SUSE Customer Center and treating it as a BYOS instance.
+.SH OPTIONS
+.IP "--access-id"
+Specify the AWS API access key
+.IP "--client-update"
+Allow the automatic update of the
+.I cloud-regionsrv-client
+package on the systems being inspected. A version greater than 9.0.0 of the
+cloud-regionsrv-client package is required to maintain access to the SUSE
+update infrastructure after May 31st 2020. If the instance is in compliance
+and this option is provided the package will automatically be updated. If
+the option is not used instances with a
+.I cloud-regionsrv-client
+package version less than 9.0.0 will be included in the compliance report.
+.IP "--instance-ids"
+A comma separated list of instance IDs to check. If no instnace IDs are
+given all instances in the given region will be checked.
+.IP "--instance-user"
+A user name in the instance that has password-less
+.I sudo
+access and that matches with the path to the private ssh key file provided.
+.IP "-p --private-key-file"
+Path to the private ssh key file for the instance user that has password-less
+sudo access in the instances being inspected.
+.IP "-r --regions"
+Specify the region in which to operate. Multiple regions can be specified as
+a comma separated list. If no region(s) is specified all connected regions in
+the
+.I standard
+AWS partitions will be scanned.
+.IP "-s --secret-key"
+The secret AWS API key
+.IP "--verbose"
+Write progress information to
+.I stdout
